@@ -2,14 +2,15 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Allwayz Product Catalog (Detailed View)</title>
+<title>Allwayz Product Catalog (Departments View)</title>
 <style>
 body {font-family:'Segoe UI',sans-serif;background:#fafafa;margin:0;}
+
 header {background:black;color:white;display:flex;align-items:center;padding:10px 20px;position:sticky;top:0;z-index:1000;}
-header img {height:50px;margin-right:15px;}
-.sidebar {width:260px;position:fixed;top:90px;bottom:0;left:0;background:#1A237E;color:white;overflow-y:auto;padding:15px;}
-.main {margin-left:280px;padding:20px;}
-.thumb {width:200px;height:auto;cursor:pointer;border-radius:6px;transition:0.2s;}
+header img {height:50px;margin-right:15px;background:white;border-radius:4px;padding:4px;}
+.sidebar {width:280px;position:fixed;top:90px;bottom:0;left:0;background:#1A237E;color:white;overflow-y:auto;padding:15px;}
+.main {margin-left:300px;padding:20px;}
+.thumb {width:200px;cursor:pointer;border-radius:6px;transition:0.2s;}
 .thumb:hover {transform:scale(1.05);}
 .grid {display:flex;flex-wrap:wrap;gap:25px;}
 .card {width:200px;text-align:center;background:white;border-radius:6px;box-shadow:0 2px 5px rgba(0,0,0,0.1);padding:10px;}
@@ -20,7 +21,7 @@ button {background:#1A237E;color:white;border:none;padding:10px 20px;border-radi
 .status-POTENTIAL {color:#FBC02D;font-weight:bold;}
 .status-NOT_ALLOWED {color:#C62828;font-weight:bold;}
 .accordion-item {background:#283593;margin-bottom:5px;border-radius:4px;}
-.accordion-item h3 {margin:0;padding:10px;cursor:pointer;font-size:15px;}
+.accordion-item h3, .accordion-item h4 {margin:0;padding:10px;cursor:pointer;font-size:15px;}
 .accordion-content {display:none;padding:10px;background:#3949AB;font-size:13px;line-height:1.4;}
 input {width:100%;padding:6px;margin-bottom:10px;border:none;border-radius:4px;}
 small {color:#666;font-size:12px;}
@@ -45,169 +46,219 @@ small {color:#666;font-size:12px;}
 
 <div id="popup" class="popup" onclick="this.style.display='none'"><img id="popup-img"></div>
 
+<!-- Load libraries first -->
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
 <script>
-/* ----------------------------------------------------------
-   Allwayz Catalog Viewer v7.2 – Detailed Card Mode
----------------------------------------------------------- */
-let data = {};
+document.addEventListener("DOMContentLoaded", () => {
 
-Promise.all([
- 'data/DesignCategoryStatus.csv',
- 'data/Categories.csv',
- 'data/Designs.csv'
-].map(f => fetch(f).then(r => r.ok ? r.text() : '')))
-.then(res => {
-  const clean = txt => Papa.parse(txt, { header: true }).data
-    .filter(r => r && Object.values(r).some(v => v && v.toString().trim() !== ''));
-  data.status = clean(res[0] || '');
-  data.categories = clean(res[1] || '');
-  data.designs = clean(res[2] || '');
-  console.log("✅ Data loaded:", {
-    categories: data.categories.length,
-    designs: data.designs.length,
-    status: data.status.length
-  });
-  init();
-});
-
-function safe(str){ return (str ?? '').toString(); }
-
-function init(){
-  buildAccordion();
-  render();
-  document.getElementById('search').oninput = () => render();
-}
-
-function buildAccordion(){
-  const acc = document.getElementById('accordion');
-  acc.innerHTML = '';
-  data.categories.forEach(c => {
-    const category = safe(c.category_name);
-    if (!category) return;
-    const related = data.status.filter(p => safe(p.category_name) === category);
-    const inner = related.map(p=>{
-      if(!p || !p.design_name) return '';
-      const design = safe(p.design_name);
-      const status = safe(p.status);
-      return `
-        <div class='design-item'
-             onclick="filterDesign('${category.replace(/'/g,"\\'")}', '${design.replace(/'/g,"\\'")}')">
-          <span class='status-${status}'>•</span> ${design}
-        </div>`;
-    }).join('');
-    const div = document.createElement('div');
-    div.className = 'accordion-item';
-    div.innerHTML = `
-      <h3 onclick="toggleAccordion(this)">${category}</h3>
-      <div class='accordion-content'>${inner || '<i>No designs found</i>'}</div>`;
-    acc.appendChild(div);
-  });
-}
-
-function toggleAccordion(el){
-  const c = el.nextElementSibling;
-  c.style.display = c.style.display === 'block' ? 'none' : 'block';
-}
-
-async function imageExists(url){
-  try { const res = await fetch(url, { method: 'HEAD' }); return res.ok; }
-  catch { return false; }
-}
-
-async function filterDesign(category, design) {
-  console.log("🟦 filterDesign triggered:", category, ">", design);
-  const gal = document.getElementById('gallery');
-  gal.innerHTML = '';
-
-  const match = data.status.find(p =>
-    safe(p.category_name).toLowerCase() === category.toLowerCase() &&
-    safe(p.design_name).toLowerCase() === design.toLowerCase()
-  );
-
-  const cleanName = safe(design).trim().toUpperCase().replace(/[^A-Z0-9]+/g, '_');
-  const jpgPath = `images/${cleanName}.jpg`;
-
-  let imgPath = '';
-  if (await imageExists(jpgPath)) imgPath = jpgPath;
-  else {
-    gal.innerHTML = `<p style="color:#666;font-style:italic;">
-      ⚠️ No image found for <b>${design}</b> (expected: ${jpgPath})
-    </p>`;
-    console.warn("⚠️ Missing:", jpgPath);
+  /* ----------------------------------------------------------
+     BASIC PASSWORD GATE (Client-side)
+  ---------------------------------------------------------- */
+  const PASSWORD = "AllwayzSecure2025";
+  let entered = prompt("🔒 Enter access password:");
+  if (entered !== PASSWORD) {
+    document.body.innerHTML = "<h2 style='text-align:center;margin-top:50px;color:red;'>Access Denied ❌</h2>";
     return;
   }
 
-  const div = document.createElement('div');
-  const code = match ? safe(match.design_code) : '—';
-  const status = match ? safe(match.status) : 'UNKNOWN';
-  div.className = 'card';
-  div.innerHTML = `
-    <img class="thumb" src="${imgPath}" onclick="showPopup('${jpgPath}')">
-    <div style="margin-top:6px;">
-      <b>${design}</b><br>
-      <small>${category}</small><br>
-      <span class="status-${status}">${status}</span><br>
-      <small>Code: ${code}</small>
-    </div>`;
-  gal.appendChild(div);
-}
+  console.log("✅ Access granted. Loading catalog...");
 
-function render(){
-  const term = safe(document.getElementById('search').value).toLowerCase();
-  const gal = document.getElementById('gallery');
-  gal.innerHTML = '';
-
-  const filtered = data.status.filter(p =>
-    safe(p.design_name).toLowerCase().includes(term) ||
-    safe(p.category_name).toLowerCase().includes(term)
-  );
-
-  for (const p of filtered) {
-    const design = safe(p.design_name);
-    const category = safe(p.category_name);
-    const code = safe(p.design_code);
-    const status = safe(p.status);
-    const cleanName = design.trim().toUpperCase().replace(/[^A-Z0-9]+/g, '_');
-    const jpgPath = `images/${cleanName}.jpg`;
-
-    const div = document.createElement('div');
-    div.className = 'card';
-    div.innerHTML = `
-      <img class="thumb" src="${jpgPath}" onerror="this.style.display='none'">
-      <div style="margin-top:6px;">
-        <b>${design}</b><br>
-        <small>${category}</small><br>
-        <span class="status-${status}">${status}</span><br>
-        <small>Code: ${code}</small>
-      </div>`;
-    gal.appendChild(div);
+  if (typeof Papa === 'undefined') {
+    console.error("🚨 PapaParse not loaded! Check CDN.");
+    return;
   }
-}
 
-function showPopup(src){
-  document.getElementById('popup-img').src = src;
-  document.getElementById('popup').style.display = 'flex';
-}
+  /* ----------------------------------------------------------
+     Allwayz Catalog Viewer v8.2 – Alphabetical + Counts + Auth
+     Departments → Categories → Designs
+  ---------------------------------------------------------- */
+  let data = {};
 
-async function generatePDF(){
-  const { jsPDF } = window.jspdf;
-  const pdf = new jsPDF('p','mm','a4');
-  const elements = document.querySelectorAll('#gallery .card');
-  let y = 10;
-  for (const el of elements) {
-    const canvas = await html2canvas(el);
-    const img = canvas.toDataURL('image/jpeg', 0.8);
-    pdf.addImage(img, 'JPEG', 10, y, 60, 70);
-    y += 75;
-    if (y > 260) { pdf.addPage(); y = 10; }
+  Promise.all([
+   'data/Departments.csv',
+   'data/DepartmentCategories.csv',
+   'data/Categories.csv',
+   'data/DesignCategoryStatus.csv'
+  ].map(f => fetch(f).then(r => r.ok ? r.text() : '')))
+  .then(res => {
+    const clean = txt => Papa.parse(txt, { header: true }).data
+      .filter(r => r && Object.values(r).some(v => v && v.toString().trim() !== ''));
+    data.departments = clean(res[0] || '');
+    data.depCats = clean(res[1] || '');
+    data.categories = clean(res[2] || '');
+    data.status = clean(res[3] || '');
+    console.log("✅ Data loaded:", {
+      departments: data.departments.length,
+      depCats: data.depCats.length,
+      categories: data.categories.length,
+      designs: data.status.length
+    });
+    init();
+  });
+
+  function safe(str){ return (str ?? '').toString(); }
+
+  function init(){
+    data.departments.sort((a,b)=>safe(a.department_name).localeCompare(safe(b.department_name)));
+    data.depCats.sort((a,b)=>safe(a.category_name).localeCompare(safe(b.category_name)));
+    data.status.sort((a,b)=>safe(a.design_name).localeCompare(safe(b.design_name)));
+    buildAccordion();
+    renderAll();
+    document.getElementById('search').oninput = () => renderSearch();
   }
-  pdf.save('AllwayzCatalog.pdf');
-  console.log("📄 PDF generated");
-}
+
+  /* ---------------- ACCORDION BUILD ---------------- */
+  function buildAccordion(){
+    const acc = document.getElementById('accordion');
+    acc.innerHTML = '';
+
+    data.departments.forEach(dep => {
+      const depId = safe(dep.department_id);
+      const depName = safe(dep.department_name);
+      if (!depId || !depName) return;
+
+      const cats = data.depCats
+        .filter(dc => safe(dc.department_id) === depId)
+        .sort((a,b)=>safe(a.category_name).localeCompare(safe(b.category_name)));
+
+      let depDesignCount = 0;
+
+      const catHTML = cats.map(dc => {
+        const catId = safe(dc.category_id);
+        const catName = safe(dc.category_name);
+        const catDesigns = data.status
+          .filter(s => safe(s.category_name) === catName)
+          .sort((a,b)=>safe(a.design_name).localeCompare(safe(b.design_name)));
+
+        depDesignCount += catDesigns.length;
+
+        const designsHTML = catDesigns.map(d => `
+            <div style="padding-left:15px;cursor:pointer;"
+                 onclick="filterDesign('${catName.replace(/'/g,"\\'")}', '${safe(d.design_name).replace(/'/g,"\\'")}')">
+              <span class='status-${safe(d.status)}'>•</span> ${safe(d.design_name)}
+            </div>
+        `).join('');
+
+        return `
+          <div class="accordion-item">
+            <h4 onclick="toggleAccordion(this);filterCategory('${catId}','${catName.replace(/'/g,"\\'")}')">
+              ${catName} (${catDesigns.length})
+            </h4>
+            <div class="accordion-content">${designsHTML || '<i>No designs</i>'}</div>
+          </div>`;
+      }).join('');
+
+      const depDiv = document.createElement('div');
+      depDiv.className = 'accordion-item';
+      depDiv.innerHTML = `
+        <h3 onclick="toggleAccordion(this);filterDepartment('${depId}','${depName.replace(/'/g,"\\'")}')">
+          ${depName} (${depDesignCount})
+        </h3>
+        <div class="accordion-content">${catHTML || '<i>No categories</i>'}</div>`;
+      acc.appendChild(depDiv);
+    });
+  }
+
+  /* ---------------- TOGGLE LOGIC ---------------- */
+  window.toggleAccordion = function(el) {
+  const c = el.nextElementSibling;
+  c.style.display = c.style.display === 'block' ? 'none' : 'block';
+};
+
+
+  /* ---------------- FILTER HANDLERS ---------------- */
+  window.filterDepartment = function(depId, depName){
+    const cats = data.depCats.filter(dc => safe(dc.department_id) === depId);
+    const catNames = cats.map(c => safe(c.category_name));
+    const designs = data.status.filter(d => catNames.includes(safe(d.category_name)));
+    renderCards(designs, `Department: ${depName}`);
+  };
+
+  window.filterCategory = function(catId, catName){
+    const designs = data.status.filter(d => safe(d.category_name) === catName);
+    renderCards(designs, `Category: ${catName}`);
+  };
+
+  window.filterDesign = function(category, design){
+    const match = data.status.find(p =>
+      safe(p.category_name).toLowerCase() === category.toLowerCase() &&
+      safe(p.design_name).toLowerCase() === design.toLowerCase()
+    );
+    renderCards(match ? [match] : [], `Design: ${design}`);
+  };
+
+  /* ---------------- GALLERY RENDER ---------------- */
+  function renderAll(){
+    const gal = document.getElementById('gallery');
+    gal.innerHTML = '<p style="color:#666;">Select a department or category to begin.</p>';
+  }
+
+  function renderCards(records, label){
+    const gal = document.getElementById('gallery');
+    gal.innerHTML = '';
+    if (!records.length){
+      gal.innerHTML = `<p style="color:#666;">No items found for ${label}.</p>`;
+      return;
+    }
+
+    records.forEach(p => {
+      const design = safe(p.design_name);
+      const category = safe(p.category_name);
+      const code = safe(p.design_code);
+      const status = safe(p.status);
+      const cleanName = design.trim().toUpperCase().replace(/[^A-Z0-9]+/g, '_');
+      const imgPath = `images/${cleanName}.jpg`;
+      const div = document.createElement('div');
+      div.className = 'card';
+      div.innerHTML = `
+        <img class="thumb" src="${imgPath}" onerror="this.style.display='none'" onclick="showPopup('${imgPath}')">
+        <div style="margin-top:6px;">
+          <b>${design}</b><br>
+          <small>${category}</small><br>
+          <span class="status-${status}">${status}</span><br>
+          <small>Code: ${code}</small>
+        </div>`;
+      gal.appendChild(div);
+    });
+  }
+
+  /* ---------------- SEARCH ---------------- */
+  function renderSearch(){
+    const term = safe(document.getElementById('search').value).toLowerCase();
+    if (!term){ renderAll(); return; }
+    const results = data.status.filter(p =>
+      safe(p.design_name).toLowerCase().includes(term) ||
+      safe(p.category_name).toLowerCase().includes(term)
+    );
+    renderCards(results, `Search: ${term}`);
+  }
+
+  /* ---------------- POPUP ---------------- */
+  window.showPopup = function(src){
+    document.getElementById('popup-img').src = src;
+    document.getElementById('popup').style.display = 'flex';
+  };
+
+  /* ---------------- PDF ---------------- */
+  window.generatePDF = async function(){
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF('p','mm','a4');
+    const elements = document.querySelectorAll('#gallery .card');
+    let y = 10;
+    for (const el of elements) {
+      const canvas = await html2canvas(el);
+      const img = canvas.toDataURL('image/jpeg', 0.8);
+      pdf.addImage(img, 'JPEG', 10, y, 60, 70);
+      y += 75;
+      if (y > 260) { pdf.addPage(); y = 10; }
+    }
+    pdf.save('AllwayzCatalog.pdf');
+  };
+
+});
 </script>
 </body>
 </html>
