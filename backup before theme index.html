@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Allwayz Product Catalog (Departments View)</title>
+<style>
+body {font-family:'Segoe UI',sans-serif;background:#fafafa;margin:0;}
+
+header {background:black;color:white;display:flex;align-items:center;padding:10px 20px;position:sticky;top:0;z-index:1000;}
+header img {height:50px;margin-right:15px;background:white;border-radius:4px;padding:4px;}
+.sidebar {width:280px;position:fixed;top:90px;bottom:0;left:0;background:#1A237E;color:white;overflow-y:auto;padding:15px;}
+.main {margin-left:300px;padding:20px;}
+.thumb {
+  width: 180px;
+  height: 180px;
+  object-fit: contain;   /* 👈 changed from 'cover' */
+  background: #f5f5f5;   /* light gray background for letterboxing */
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.thumb:hover {transform:scale(1.05);}
+.grid {display:flex;flex-wrap:wrap;gap:25px;}
+.card {
+  width: 220px;
+  height: 330px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  box-sizing: border-box;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.card .thumb {
+  width: 180px;
+  height: 180px;
+  object-fit: contain;
+  background: #f9f9f9;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.card-content {
+  flex-grow: 1;
+  margin-top: 10px;
+  width: 100%;
+  text-align: center;
+  line-height: 1.4;
+}
+
+.card-content b {
+  display: block;
+  font-size: 15px;
+  color: #222;
+  margin-bottom: 2px;
+  text-transform: capitalize;
+}
+
+.card-content small {
+  display: block;
+  font-size: 12px;
+  color: #555;
+  margin-bottom: 2px;
+  text-transform: capitalize;
+}
+
+.card-content .theme {
+  color: #1A237E;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.card-content .status {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  margin: 4px 0;
+}
+
+.status-AVAILABLE { background: #E8F5E9; color: #2E7D32; }
+.status-POTENTIAL { background: #FFF8E1; color: #F9A825; }
+.status-NOT_ALLOWED { background: #FFEBEE; color: #C62828; }
+
+.card-content .code {
+  font-size: 11px;
+  color: #888;
+  margin-top: 5px;
+}
+
+
+.popup {display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);align-items:center;justify-content:center;}
+.popup img {max-width:90%;max-height:90%;border-radius:8px;}
+button {background:#1A237E;color:white;border:none;padding:10px 20px;border-radius:4px;cursor:pointer;margin-top:10px;width:100%;}
+.status-AVAILABLE {color:#2E7D32;font-weight:bold;}
+.status-POTENTIAL {color:#FBC02D;font-weight:bold;}
+.status-NOT_ALLOWED {color:#C62828;font-weight:bold;}
+.accordion-item {background:#283593;margin-bottom:5px;border-radius:4px;}
+.accordion-item h3, .accordion-item h4 {margin:0;padding:10px;cursor:pointer;font-size:15px;text-transform:capitalize;}
+.accordion-content {display:none;padding:10px;background:#3949AB;font-size:13px;line-height:1.4;text-transform:capitalize;}
+/* Accordion structure improvements */
+.accordion-item {
+  background: #283593;
+  margin-bottom: 5px;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+/* Department Level */
+.accordion-item h2 {
+  background: #1A237E;
+  color: white;
+  padding: 10px 12px;
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+.accordion-item h2:hover { background: #303F9F; }
+
+/* Category Level */
+.accordion-item h3 {
+  background: #283593;
+  color: #fff;
+  padding: 8px 12px;
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0;
+  cursor: pointer;
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
+.accordion-item h3:hover { background: #3143A1; }
+
+/* Theme Level */
+.accordion-item h4 {
+  background: #3949AB;
+  color: #fff;
+  padding: 8px 14px;
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0;
+  cursor: pointer;
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
+.accordion-item h4:hover { background: #3F51B5; }
+
+/* Accordion content panels */
+.accordion-content {
+  display: none;
+  background: #E8EAF6;
+  padding: 8px 12px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #222;
+}
+
+/* Nested item indentation for design list */
+.design-item {
+  margin: 4px 0 4px 12px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+.design-item:hover {
+  background: #F0F0F0;
+}
+
+/* Status indicators in design list */
+.design-item span.status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 8px;
+}
+
+.status-dot.AVAILABLE { background: #2E7D32; }
+.status-dot.POTENTIAL { background: #F9A825; }
+.status-dot.NOT_ALLOWED { background: #C62828; }
+
+.design-item .design-name {
+  flex: 1;
+  font-size: 13px;
+  color: #333;
+  text-transform: capitalize;
+}
+
+input {width:100%;padding:6px;margin-bottom:10px;border:none;border-radius:4px;}
+small {color:#666;font-size:12px;text-transform:capitalize;}
+
+</style>
+</head>
+<body>
+<header>
+  <img src="ALLWAYZ_MAGS_LOGO.png" alt="Allwayz Logo">
+  <h1>Allwayz Product Catalog</h1>
+</header>
+
+<div class="sidebar">
+  <h2>Filters</h2>
+  <input type="text" id="search" placeholder="Search...">
+  <div id="accordion"></div>
+  <button onclick="generatePDF()">Generate PDF Catalog</button>
+</div>
+
+<div class="main">
+  <div id="gallery" class="grid"></div>
+</div>
+
+<div id="popup" class="popup" onclick="this.style.display='none'"><img id="popup-img"></div>
+
+<!-- Load libraries first -->
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+<script>
+	document.addEventListener("DOMContentLoaded", () => {
+
+	const PASSWORD = "AllwayzSecure2025"; 
+	const isLocal = window.location.hostname === "localhost" || window.location.href.startsWith("http://localhost:8000/");
+
+	// if not running locally, enforce password
+	if (!isLocal) {
+	  let entered = prompt("🔒 Enter access password:");
+	  if (entered !== PASSWORD) {
+		document.body.innerHTML = "<h2 style='text-align:center;margin-top:50px;color:red;'>Access Denied ❌</h2>";
+		throw new Error("Access Denied");
+	  }
+	} else {
+	  console.log("🔓 Localhost detected — password bypassed.");
+	}
+
+  console.log("✅ Access granted. Loading catalog...");
+
+  let data = {};
+
+  Promise.all([
+   'data/Departments.csv',
+   'data/DepartmentCategories.csv',
+   'data/Categories.csv',
+   'data/DesignCategoryStatus.csv',
+   'data/DesignThemeMapping.csv'
+  ].map(f => fetch(f).then(r => r.ok ? r.text() : '')))
+  .then(res => {
+    const clean = txt => Papa.parse(txt, { header: true }).data
+      .filter(r => r && Object.values(r).some(v => v && v.toString().trim() !== ''));
+    data.departments = clean(res[0] || '');
+    data.depCats = clean(res[1] || '');
+    data.categories = clean(res[2] || '');
+    data.status = clean(res[3] || '');
+	data.desThemeMap = clean(res[4] || '');
+    init();
+  });
+
+  function safe(str){ return (str ?? '').toString(); }
+  function toProperCase(str){
+    return safe(str).toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
+  }
+
+  function init(){
+    data.departments.sort((a,b)=>safe(a.department_name).localeCompare(safe(b.department_name)));
+    data.depCats.sort((a,b)=>safe(a.category_name).localeCompare(safe(b.category_name)));
+    data.status.sort((a,b)=>safe(a.design_name).localeCompare(safe(b.design_name)));
+	data.desThemeMap.sort((a,b)=>safe(a.Theme).localeCompare(safe(b.Theme)));
+	// Merge theme data into status list
+	data.status.forEach(s => {
+	  const themeMatch = data.desThemeMap.find(t =>
+		safe(t.design_name).toLowerCase() === safe(s.design_name).toLowerCase()
+	  );
+	  s.theme = themeMatch ? safe(themeMatch.Theme) : "Uncategorized";
+	});
+
+    buildAccordion();
+    renderAll();
+    document.getElementById('search').oninput = () => renderSearch();
+  }
+
+  function buildAccordion(){
+  const acc = document.getElementById('accordion');
+  acc.innerHTML = '';
+
+  data.departments.forEach(dep => {
+    const depId = safe(dep.department_id);
+    const depName = toProperCase(safe(dep.department_name));
+    if (!depId || !depName) return;
+
+    const cats = data.depCats
+      .filter(dc => safe(dc.department_id) === depId)
+      .sort((a,b)=>safe(a.category_name).localeCompare(safe(b.category_name)));
+
+    let depDesignCount = 0;
+
+    const catHTML = cats.map(dc => {
+      const catId = safe(dc.category_id);
+      const catName = toProperCase(safe(dc.category_name));
+
+      // all designs in this category
+      const catDesigns = data.status.filter(
+        s => safe(s.category_name).toLowerCase() === safe(dc.category_name).toLowerCase()
+      );
+      depDesignCount += catDesigns.length;
+
+      // group these designs by Theme
+      const themeGroups = {};
+      catDesigns.forEach(d => {
+        const th = safe(d.theme) || "Uncategorized";
+        if (!themeGroups[th]) themeGroups[th] = [];
+        themeGroups[th].push(d);
+      });
+
+      // build theme level
+      const themeHTML = Object.keys(themeGroups).sort().map(themeName => {
+        const themeDesigns = themeGroups[themeName];
+        const designsHTML = themeDesigns.map(d => `
+			  <div class="design-item" onclick="filterDesign('${catName.replace(/'/g,"\\'")}', '${safe(d.design_name).replace(/'/g,"\\'")}')">
+				<span class="status-dot ${safe(d.status)}"></span>
+				<div class="design-name">${toProperCase(safe(d.design_name))}</div>
+			  </div>
+			`).join('');
+
+
+        return `
+          <div class="accordion-item">
+            <h4 onclick="toggleAccordion(this);filterThemeByCategory('${catName.replace(/'/g,"\\'")}','${themeName.replace(/'/g,"\\'")}')">
+              ${themeName} (${themeDesigns.length})
+            </h4>
+            <div class="accordion-content">${designsHTML || '<i>No designs</i>'}</div>
+          </div>`;
+      }).join('');
+
+      return `
+        <div class="accordion-item">
+          <h3 onclick="toggleAccordion(this);filterCategory('${catId}','${catName.replace(/'/g,"\\'")}')">
+            ${catName} (${catDesigns.length})
+          </h3>
+          <div class="accordion-content">${themeHTML || '<i>No themes</i>'}</div>
+        </div>`;
+    }).join('');
+
+    // department wrapper
+    const depDiv = document.createElement('div');
+    depDiv.className = 'accordion-item';
+    depDiv.innerHTML = `
+      <h2 onclick="toggleAccordion(this);filterDepartment('${depId}','${depName.replace(/'/g,"\\'")}')">
+        ${depName} (${depDesignCount})
+      </h2>
+      <div class="accordion-content">${catHTML || '<i>No categories</i>'}</div>`;
+    acc.appendChild(depDiv);
+  });
+}
+
+
+
+  window.toggleAccordion = function(el) {
+    const c = el.nextElementSibling;
+    c.style.display = c.style.display === 'block' ? 'none' : 'block';
+  };
+  
+  window.toggleAccordion = function(el) {
+  const parent = el.parentElement.parentElement;
+  // close siblings
+  [...parent.children].forEach(sib => {
+    const content = sib.querySelector('.accordion-content');
+    if (content && content !== el.nextElementSibling) content.style.display = 'none';
+  });
+  // toggle current
+  const c = el.nextElementSibling;
+  c.style.display = c.style.display === 'block' ? 'none' : 'block';
+};
+
+
+  window.filterDepartment = function(depId, depName){
+    const cats = data.depCats.filter(dc => safe(dc.department_id) === depId);
+    const catNames = cats.map(c => safe(c.category_name));
+    const designs = data.status.filter(d => catNames.includes(safe(d.category_name)));
+    renderCards(designs, `Department: ${depName}`);
+  };
+
+  window.filterCategory = function(catId, catName){
+    const designs = data.status.filter(d => safe(d.category_name).toLowerCase() === catName.toLowerCase());
+    renderCards(designs, `Category: ${catName}`);
+  };
+  
+  window.filterTheme = function(themeName){
+  const designs = data.status.filter(d => safe(d.theme) === themeName);
+  renderCards(designs, `Theme: ${themeName}`);
+	};
+
+	window.filterCategoryByTheme = function(catName, themeName){
+	  const designs = data.status.filter(d =>
+		safe(d.theme) === themeName &&
+		safe(d.category_name).toLowerCase() === catName.toLowerCase()
+	  );
+	  renderCards(designs, `Theme: ${themeName} → Category: ${catName}`);
+	};
+window.filterThemeByCategory = function(catName, themeName) {
+  const designs = data.status.filter(d =>
+    safe(d.category_name).toLowerCase() === catName.toLowerCase() &&
+    safe(d.theme) === themeName
+  );
+  renderCards(designs, `Category: ${catName} → Theme: ${themeName}`);
+};
+
+
+  window.filterDesign = function(category, design){
+    const match = data.status.find(p =>
+      safe(p.category_name).toLowerCase() === category.toLowerCase() &&
+      safe(p.design_name).toLowerCase() === design.toLowerCase()
+    );
+    renderCards(match ? [match] : [], `Design: ${design}`);
+  };
+
+  function renderAll(){
+    const gal = document.getElementById('gallery');
+    gal.innerHTML = '<p style="color:#666;">Select a department or category to begin.</p>';
+  }
+
+  function renderCards(records, label){
+    const gal = document.getElementById('gallery');
+    gal.innerHTML = '';
+    if (!records.length){
+      gal.innerHTML = `<p style="color:#666;">No items found for ${label}.</p>`;
+      return;
+    }
+
+    records.forEach(p => {
+      const design = toProperCase(safe(p.design_name));
+      const category = toProperCase(safe(p.category_name));
+      const code = safe(p.design_code);
+      const status = safe(p.status);
+      const cleanName = design.trim().toUpperCase().replace(/[^A-Z0-9]+/g, '_');
+      const imgPath = `images/${cleanName}.jpg`;
+      const div = document.createElement('div');
+      div.className = 'card';
+      div.innerHTML = `
+        <img class="thumb" src="${imgPath}" onerror="this.style.display='none'" onclick="showPopup('${imgPath}')">
+        <div class="card-content">
+		  <b>${design}</b>
+		  <small>${category}</small>
+		  <small class="theme">${safe(p.theme)}</small>
+		  <span class="status status-${status}">${status}</span>
+		  <div class="code">Code: ${code}</div>
+		</div>`;
+      gal.appendChild(div);
+    });
+  }
+
+  function renderSearch(){
+    const term = safe(document.getElementById('search').value).toLowerCase();
+    if (!term){ renderAll(); return; }
+    const results = data.status.filter(p =>
+      safe(p.design_name).toLowerCase().includes(term) ||
+      safe(p.category_name).toLowerCase().includes(term)
+    );
+    renderCards(results, `Search: ${term}`);
+  }
+
+  window.showPopup = function(src){
+    document.getElementById('popup-img').src = src;
+    document.getElementById('popup').style.display = 'flex';
+  };
+
+  window.generatePDF = async function(){
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF('p','mm','a4');
+    const elements = document.querySelectorAll('#gallery .card');
+    let y = 10;
+    for (const el of elements) {
+      const canvas = await html2canvas(el);
+      const img = canvas.toDataURL('image/jpeg', 0.8);
+      pdf.addImage(img, 'JPEG', 10, y, 60, 70);
+      y += 75;
+      if (y > 260) { pdf.addPage(); y = 10; }
+    }
+    pdf.save('AllwayzCatalog.pdf');
+  };
+
+});
+</script>
+</body>
+</html>
