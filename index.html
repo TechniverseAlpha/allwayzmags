@@ -16,8 +16,49 @@ nav a:hover, nav a.active {background:#3949AB;}
 .grid {display:flex;flex-wrap:wrap;gap:25px;}
 .thumb {width:180px;height:180px;object-fit:contain;background:#f5f5f5;border:1px solid #ddd;border-radius:6px;cursor:pointer;transition:0.2s;}
 .thumb:hover {transform:scale(1.05);}
-.card {width:220px;height:330px;background:white;border-radius:10px;box-shadow:0 2px 6px rgba(0,0,0,0.15);padding:12px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;box-sizing:border-box;overflow:hidden;transition:transform 0.2s ease, box-shadow 0.2s ease;}
-.card:hover {transform:translateY(-4px);box-shadow:0 4px 12px rgba(0,0,0,0.2);}
+.card {
+  width: 260px;
+  height: 520px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  box-sizing: border-box;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+.price-table-wrapper {
+  margin-top: 8px;
+  border-top: 1px solid #eee;
+  border-bottom: 1px solid #eee;
+  /* remove max-height and scroll */
+  max-height: none;
+  overflow-y: visible;
+}
+
+.price-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+}
+.price-table th, .price-table td {
+  padding: 2px 4px;
+  text-align: left;
+  border: none;
+}
+.price-table th {
+  background: #f9f9f9;
+  color: #333;
+}
+
 .card .thumb {width:180px;height:180px;object-fit:contain;background:#f9f9f9;border:1px solid #e0e0e0;border-radius:8px;}
 .card-content {flex-grow:1;margin-top:10px;width:100%;text-align:center;line-height:1.4;}
 .card-content b {display:block;font-size:15px;color:#222;margin-bottom:2px;text-transform:capitalize;}
@@ -28,11 +69,115 @@ nav a:hover, nav a.active {background:#3949AB;}
 .status-POTENTIAL {background:#FFF8E1;color:#F9A825;}
 .status-NOT_ALLOWED {background:#FFEBEE;color:#C62828;}
 .card-content .code {font-size:11px;color:#888;margin-top:5px;}
-.popup {display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);align-items:center;justify-content:center;}
-.popup img {
-  border: 8px solid white;
-  box-shadow: 0 0 25px rgba(0,0,0,0.7);
+
+
+.popup {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.75);
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
 }
+
+
+
+.popup-content {
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+  display: flex;
+  flex-direction: row;
+  max-width: 900px;
+  width: 90%;
+  max-height: 85%;
+  overflow: hidden;
+  animation: fadeIn 0.25s ease;
+}
+
+@keyframes fadeIn {
+  from {opacity:0; transform: scale(0.98);}
+  to {opacity:1; transform: scale(1);}
+}
+
+.popup-left {
+  flex: 1.2;
+  background: #f7f7f7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.popup-left img {
+  max-width: 100%;
+  max-height: 80vh;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+
+.popup-right {
+  flex: 1.5;
+  padding: 25px;
+  overflow-y: auto;
+  font-size: 14px;
+  color: #333;
+}
+
+.popup-right h2 {
+  color: #1A237E;
+  font-size: 18px;
+  margin: 0 0 10px;
+}
+.popup-right .meta {
+  margin-bottom: 12px;
+  color: #555;
+  font-size: 13px;
+}
+.popup-right .status {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  margin-left: 6px;
+}
+.popup-right table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 12px;
+  font-size: 12px;
+}
+.popup-right th {
+  background: #E8EAF6;
+  text-align: left;
+  padding: 4px 6px;
+  border-bottom: 1px solid #ccc;
+}
+.popup-right td {
+  padding: 4px 6px;
+  border-bottom: 1px solid #f0f0f0;
+}
+.popup-close {
+  position: absolute;
+  top: 12px;
+  right: 20px;
+  background: transparent;
+  border: none;
+  font-size: 24px;
+  color: #333;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+/* Ensure popup only shows when display:flex is explicitly added */
+.popup[style*="display: flex"] {
+  display: flex !important;
+}
+
+
 
 button {background:#1A237E;color:white;border:none;padding:10px 20px;border-radius:4px;cursor:pointer;margin-top:10px;width:100%;}
 .accordion-item {background:#283593;margin-bottom:5px;border-radius:6px;overflow:hidden;}
@@ -106,6 +251,152 @@ small {color:#666;font-size:12px;text-transform:capitalize;}
   font-weight: 600;
   text-transform: capitalize;
 }
+.price-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 6px;
+  font-size: 11px;
+}
+.price-table th, .price-table td {
+  padding: 2px 4px;
+  border: none;
+}
+.price-table th {
+  background: #f0f0f0;
+  color: #333;
+  text-align: left;
+}
+
+/* --- Catalog Popup Enhanced ERP Style  --- */
+/* --- Catalog Popup: Optimized layout --- */
+#catalogPopup .popup-content {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  width: 1150px;              /* slightly wider overall */
+  max-width: 96%;
+  max-height: 92%;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.35);
+  overflow: hidden;
+  animation: fadeIn 0.25s ease;
+}
+
+/* Left side (image) */
+#catalogPopup .popup-left {
+  flex: 1;
+  background: #f5f5f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;              /* tighter padding */
+}
+
+#catalogPopup .popup-left img {
+  max-width: 95%;
+  max-height: 85vh;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  object-fit: contain;
+  transform: scale(1.25);     /* zoom image in slightly */
+}
+
+/* Right side (details) */
+#catalogPopup .popup-right {
+  flex: 1.8;
+  padding: 28px;
+  overflow-y: auto;
+  font-size: 14px;
+  color: #333;
+}
+
+#catalogPopup .popup-right h2 {
+  color: #1A237E;
+  font-size: 22px;
+  margin-top: 0;
+  margin-bottom: 6px;
+}
+
+#catalogPopup .popup-right table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  margin-top: 14px;
+  font-size: 12.5px;
+  white-space: nowrap;
+}
+
+#catalogPopup .popup-right th,
+#catalogPopup .popup-right td {
+  padding: 8px 10px;
+  border-bottom: 1px solid #eee;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#catalogPopup .popup-right th {
+  background: #E8EAF6;
+  color: #1A237E;
+  font-weight: 600;
+}
+
+/* Make columns a bit wider */
+#catalogPopup .popup-right th:nth-child(1),
+#catalogPopup .popup-right td:nth-child(1) { width: 10%; } /* Item No */
+#catalogPopup .popup-right th:nth-child(2),
+#catalogPopup .popup-right td:nth-child(2) { width: 20%; } /* Size */
+#catalogPopup .popup-right th:nth-child(3),
+#catalogPopup .popup-right td:nth-child(3) { width: 12%; } /* Weight */
+#catalogPopup .popup-right th:nth-child(4),
+#catalogPopup .popup-right td:nth-child(4) { width: 16%; } /* Box */
+#catalogPopup .popup-right th:nth-child(5),
+#catalogPopup .popup-right td:nth-child(5) { width: 10%; text-align: right; } /* WHS */
+#catalogPopup .popup-right th:nth-child(6),
+#catalogPopup .popup-right td:nth-child(6) { width: 10%; text-align: right; } /* Retail */
+#catalogPopup .popup-right th:nth-child(7),
+#catalogPopup .popup-right td:nth-child(7) { width: 12%; } /* Date */
+
+
+/* --- Popup close button unified style (for all popups) --- */
+.popup-content {
+  position: relative; /* make each popup the reference for absolute positioning */
+}
+
+.popup-close {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.8);
+  border-radius: 50%;
+  border: none;
+  font-size: 22px;
+  color: #333;
+  cursor: pointer;
+  font-weight: bold;
+  z-index: 9999;
+  transition: all 0.2s ease;
+}
+
+.popup-close:hover {
+  background: rgba(255,255,255,1);
+  color: #000;
+  transform: scale(1.15);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+}
+
+/* Remove duplicate catalog-specific transform */
+#catalogPopup .popup-close {
+  transform: none !important;
+}
+
+
+
 
 
 </style>
@@ -142,7 +433,27 @@ small {color:#666;font-size:12px;text-transform:capitalize;}
   <div id="themesAccordion"></div>
 </div>
 
-<div id="popup" class="popup" onclick="this.style.display='none'"><img id="popup-img"></div>
+<div id="themePopup" class="popup">
+  <div class="popup-content">
+    <div class="popup-left">
+      <img id="themePopup-img" src="" alt="">
+    </div>
+    <div class="popup-right" id="themePopup-details"></div>
+    <button class="popup-close" onclick="closeThemePopup()">×</button>
+  </div>
+</div>
+
+<div id="catalogPopup" class="popup">
+  <div class="popup-content">
+    <div class="popup-left">
+      <img id="catalogPopup-img" src="" alt="">
+    </div>
+    <div class="popup-right" id="catalogPopup-details"></div>
+    <button class="popup-close" onclick="closeCatalogPopup()">×</button>
+  </div>
+</div>
+
+
 
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
@@ -166,7 +477,8 @@ document.addEventListener("DOMContentLoaded", () => {
     'data/DepartmentCategories.csv',
     'data/Categories.csv',
     'data/DesignCategoryStatus.csv',
-    'data/DesignThemeMapping.csv'
+    'data/DesignThemeMapping.csv',
+    'data/CategoryProductPrice.csv'   // ✅ New file
   ].map(f => fetch(f).then(r => r.ok ? r.text() : '')))
   .then(res => {
     const clean = txt => Papa.parse(txt, { header: true }).data.filter(r => r && Object.values(r).some(v => v && v.toString().trim() !== ''));
@@ -174,18 +486,27 @@ document.addEventListener("DOMContentLoaded", () => {
     data.depCats = clean(res[1] || '').sort((a,b)=>a.category_name.localeCompare(b.category_name));
     data.categories = clean(res[2] || '');
     data.status = clean(res[3] || '').sort((a,b)=>a.design_name.localeCompare(b.design_name));
-	data.desThemeMap = clean(res[4] || '').sort((a,b)=>a.Theme.localeCompare(b.Theme));
+    data.desThemeMap = clean(res[4] || '').sort((a,b)=>a.Theme.localeCompare(b.Theme));
+    data.prices = clean(res[5] || '');  // ✅ Parse prices
 
-	// Merge Theme into status
-	data.status.forEach(s => {
-	  const themeMatch = data.desThemeMap.find(t =>
-		safe(t.design_name).toLowerCase().trim() === safe(s.design_name).toLowerCase().trim()
-	  );
-	  s.theme = themeMatch ? safe(themeMatch.Theme) : "Uncategorized";
-	});
+    // Normalize and clean
+    data.prices.forEach(p => {
+      p.category_name = safe(p.category_name).trim();
+      p.product_code = safe(p.product_code).trim();
+      p.size = safe(p.size).trim();
+      p.WHS = safe(p.WHS).replace(/[^0-9.]/g, '');
+      p.RETAIL = safe(p.RETAIL).replace(/[^0-9.]/g, '');
+    });
 
-	init();
+    // Merge Theme into status
+    data.status.forEach(s => {
+      const themeMatch = data.desThemeMap.find(t =>
+        safe(t.design_name).toLowerCase().trim() === safe(s.design_name).toLowerCase().trim()
+      );
+      s.theme = themeMatch ? safe(themeMatch.Theme) : "Uncategorized";
+    });
 
+    init();
   });
 
   function safe(str){ return (str ?? '').toString(); }
@@ -275,20 +596,18 @@ document.addEventListener("DOMContentLoaded", () => {
       if(term && !themeName.toLowerCase().includes(term))return;
       const designs=themeGroups[themeName].sort();
       const cardsHTML = designs.map(des => {
-		  const cleanName = des.trim().toUpperCase().replace(/[^A-Z0-9]+/g,'_');
-		  const jpg = `images/jpg/${cleanName}.jpg`;
-		  const png = `images/png/${cleanName}.png`;
-		  return `
-			<div class="theme-card">
-			  <div class="design-name">${toProperCase(des)}</div>
-			  <img class="thumb" src="${jpg}" onerror="this.style.display='none'" onclick="showPopup('${jpg}')">
-			  <div class="label">JPG Preview</div>
-			  <img class="thumb secondary" src="${png}" onerror="this.style.display='none'" onclick="showPopup('${png}')">
-			  <div class="label">PNG Cutout</div>
-			  
-			</div>`;
-		}).join('');
-
+        const cleanName = des.trim().toUpperCase().replace(/[^A-Z0-9]+/g,'_');
+        const jpg = `images/jpg/${cleanName}.jpg`;
+        const png = `images/png/${cleanName}.png`;
+        return `
+          <div class="theme-card">
+            <div class="design-name">${toProperCase(des)}</div>
+            <img class="thumb" src="${jpg}" onerror="this.style.display='none'" onclick="showPopup('${jpg}')">
+            <div class="label">JPG Preview</div>
+            <img class="thumb secondary" src="${png}" onerror="this.style.display='none'" onclick="showPopup('${png}')">
+            <div class="label">PNG Cutout</div>
+          </div>`;
+      }).join('');
 
       const themeDiv=document.createElement('div');
       themeDiv.className='accordion-item';
@@ -297,41 +616,205 @@ document.addEventListener("DOMContentLoaded", () => {
       acc.appendChild(themeDiv);
     });
   }
-// ===== FILTERS for CATALOG =====
-window.filterDepartment = function(depId, depName){
-  const cats = data.depCats.filter(dc => safe(dc.department_id) === depId);
-  const catNames = cats.map(c => safe(c.category_name));
-  const designs = data.status.filter(d => catNames.includes(safe(d.category_name)));
-  renderCards(designs, `Department: ${depName}`);
+
+  // ===== FILTERS for CATALOG =====
+  window.filterDepartment = function(depId, depName){
+    const cats = data.depCats.filter(dc => safe(dc.department_id) === depId);
+    const catNames = cats.map(c => safe(c.category_name));
+    const designs = data.status.filter(d => catNames.includes(safe(d.category_name)));
+    renderCards(designs, `Department: ${depName}`);
+  };
+
+  window.filterCategory = function(catId, catName){
+    const designs = data.status.filter(d => safe(d.category_name).toLowerCase() === catName.toLowerCase());
+    renderCards(designs, `Category: ${catName}`);
+  };
+
+  window.filterThemeByCategory = function(catName, themeName){
+    const designs = data.status.filter(d =>
+      safe(d.category_name).toLowerCase() === catName.toLowerCase() &&
+      safe(d.theme) === themeName
+    );
+    renderCards(designs, `Category: ${catName} → Theme: ${themeName}`);
+  };
+
+  window.filterDesign = function(category, design){
+    const match = data.status.find(p =>
+      safe(p.category_name).toLowerCase() === category.toLowerCase() &&
+      safe(p.design_name).toLowerCase() === design.toLowerCase()
+    );
+    renderCards(match ? [match] : [], `Design: ${design}`);
+  };
+// ===== THEME POPUP =====
+window.showPopup = function(src) {
+  const popup = document.getElementById('themePopup');
+  const popupImg = document.getElementById('themePopup-img');
+  popupImg.src = src;
+  popup.style.display = 'flex';
 };
 
-window.filterCategory = function(catId, catName){
-  const designs = data.status.filter(d => safe(d.category_name).toLowerCase() === catName.toLowerCase());
-  renderCards(designs, `Category: ${catName}`);
+window.closeThemePopup = function() {
+  document.getElementById('themePopup').style.display = 'none';
 };
 
-window.filterThemeByCategory = function(catName, themeName){
-  const designs = data.status.filter(d =>
-    safe(d.category_name).toLowerCase() === catName.toLowerCase() &&
-    safe(d.theme) === themeName
-  );
-  renderCards(designs, `Category: ${catName} → Theme: ${themeName}`);
+// ===== CATALOG POPUP =====
+window.showCatalogPopup = function(designObj, priceMatches) {
+  if (!priceMatches || !priceMatches.length) return; // only open if data
+
+  const popup = document.getElementById('catalogPopup');
+  const imgEl = document.getElementById('catalogPopup-img');
+  const detailEl = document.getElementById('catalogPopup-details');
+
+  const design = toProperCase(safe(designObj.design_name));
+  const category = toProperCase(safe(designObj.category_name));
+  const theme = safe(designObj.theme);
+  const status = safe(designObj.status);
+
+  const cleanName = design.trim().toUpperCase().replace(/[^A-Z0-9]+/g, '_');
+  const imgPath = `images/jpg/${cleanName}.jpg`;
+
+  imgEl.onerror = () => (imgEl.src = 'images/placeholder.jpg');
+  imgEl.src = imgPath;
+
+  const rows = priceMatches.map(pr => `
+    <tr>
+      <td>${safe(pr.item_no)}</td>
+      <td>${safe(pr.size)}</td>
+      <td>${safe(pr.weight_lbs)}</td>
+      <td>${safe(pr.box_dimensions)}</td>
+      <td style="text-align:right;">${safe(pr.wholesale_price)}</td>
+      <td style="text-align:right;">${safe(pr.retail_price)}</td>
+      <td>${safe(pr.date)}</td>
+    </tr>`).join('');
+
+  detailEl.innerHTML = `
+    <h2>${design}</h2>
+    <div class="meta"><b>Category:</b> ${category}</div>
+    <div class="meta"><b>Theme:</b> ${theme}</div>
+    <div class="meta"><b>Status:</b>
+      <span class="status status-${status}">${status}</span>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Item No</th>
+          <th>Size</th>
+          <th>Weight (lbs)</th>
+          <th>Box Dimensions</th>
+          <th>WHS</th>
+          <th>Retail</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `;
+
+  popup.style.display = 'flex';
 };
 
-window.filterDesign = function(category, design){
-  const match = data.status.find(p =>
-    safe(p.category_name).toLowerCase() === category.toLowerCase() &&
-    safe(p.design_name).toLowerCase() === design.toLowerCase()
-  );
-  renderCards(match ? [match] : [], `Design: ${design}`);
+window.closeCatalogPopup = function() {
+  document.getElementById('catalogPopup').style.display = 'none';
 };
 
-  window.showPopup=function(src){document.getElementById('popup-img').src=src;document.getElementById('popup').style.display='flex';};
 
-  function renderAll(){document.getElementById('gallery').innerHTML='<p style="color:#666;">Select a department or category to begin.</p>';}
-  function renderSearch(){const term=safe(document.getElementById('search').value).toLowerCase();if(!term){renderAll();return;}const results=data.status.filter(p=>safe(p.design_name).toLowerCase().includes(term)||safe(p.category_name).toLowerCase().includes(term));renderCards(results,`Search: ${term}`);}
-  function renderCards(records,label){const gal=document.getElementById('gallery');gal.innerHTML='';if(!records.length){gal.innerHTML=`<p style="color:#666;">No items found for ${label}.</p>`;return;}records.forEach(p=>{const design=toProperCase(safe(p.design_name));const category=toProperCase(safe(p.category_name));const code=safe(p.design_code);const status=safe(p.status);const cleanName=design.trim().toUpperCase().replace(/[^A-Z0-9]+/g,'_');const imgPath=`images/jpg/${cleanName}.jpg`;const div=document.createElement('div');div.className='card';div.innerHTML=`<img class="thumb" src="${imgPath}" onerror="this.style.display='none'" onclick="showPopup('${imgPath}')"><div class="card-content"><b>${design}</b><small>${category}</small><small class="theme">${safe(p.theme)}</small><span class="status status-${status}">${status}</span><div class="code">Code: ${code}</div></div>`;gal.appendChild(div);});}
+
+document.addEventListener('keydown', e=>{
+  if(e.key==='Escape'){
+    closePopup();
+    closeCatalogPopup();
+  }
 });
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closePopup();
+});
+
+  function renderAll(){
+    document.getElementById('gallery').innerHTML='<p style="color:#666;">Select a department or category to begin.</p>';
+  }
+
+  function renderSearch(){
+    const term=safe(document.getElementById('search').value).toLowerCase();
+    if(!term){renderAll();return;}
+    const results=data.status.filter(p=>
+      safe(p.design_name).toLowerCase().includes(term) ||
+      safe(p.category_name).toLowerCase().includes(term)
+    );
+    renderCards(results,`Search: ${term}`);
+  }
+
+  // ====== RENDER CARDS (with price integration) ======
+  function renderCards(records,label){
+  const gal=document.getElementById('gallery');
+  gal.innerHTML='';
+  if(!records.length){
+    gal.innerHTML=`<p style="color:#666;">No items found for ${label}.</p>`;
+    return;
+  }
+
+  records.forEach(p => {
+  const design = toProperCase(safe(p.design_name));
+  const category = toProperCase(safe(p.category_name));
+  const code = safe(p.design_code);
+  const status = safe(p.status);
+  const cleanName = design.trim().toUpperCase().replace(/[^A-Z0-9]+/g, '_');
+  const imgPath = `images/jpg/${cleanName}.jpg`;
+
+  const priceMatches = data.prices.filter(pr =>
+    safe(pr.category_name).toLowerCase() === safe(p.category_name).toLowerCase()
+  );
+
+  let priceHTML = '';
+  if (priceMatches.length) {
+    const tableRows = priceMatches.map(pr => `
+      <tr><td>${safe(pr.product_code)}</td><td>${safe(pr.size)}</td></tr>
+    `).join('');
+    priceHTML = `
+      <div class="price-table-wrapper">
+        <table class="price-table">
+          <thead><tr><th>Code</th><th>Size</th></tr></thead>
+          <tbody>${tableRows}</tbody>
+        </table>
+      </div>`;
+  } else {
+    priceHTML = `<div style="margin-top:6px;font-size:11px;color:#999;">No product data available</div>`;
+  }
+
+  const div = document.createElement('div');
+  div.className = 'card';
+  div.innerHTML = `
+    <img class="thumb" src="${imgPath}" onerror="this.style.display='none'">
+    <div class="card-content">
+      <b>${design}</b>
+      <small>${category}</small>
+      <small class="theme">${safe(p.theme)}</small>
+      <span class="status status-${status}">${status}</span>
+      <div class="code">Code: ${code}</div>
+      ${priceHTML}
+    </div>`;
+  gal.appendChild(div);
+});
+
+// Attach click events once
+Array.from(gal.querySelectorAll('.thumb')).forEach((img, idx) => {
+  img.addEventListener('click', () => {
+    const designObj = records[idx];
+    const priceMatches = data.prices.filter(pr =>
+      safe(pr.category_name).toLowerCase() === safe(designObj.category_name).toLowerCase()
+    );
+    if (priceMatches.length) showCatalogPopup(designObj, priceMatches);
+  });
+}); // <-- closes forEach
+
+} // <-- closes renderCards function
+
+}); // <-- closes DOMContentLoaded listener
 </script>
+
+
+
+
+
 </body>
 </html>
